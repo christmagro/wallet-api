@@ -1,0 +1,20 @@
+spring:
+    datasource:
+        driverClassName: org.h2.Driver
+        hikari:
+            schema: WALLET
+        password: ''
+        url: jdbc:h2:file:C:/data/sample;MODE=Mysql;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=true;INIT=CREATE SCHEMA IF NOT EXISTS WALLET
+        username: sa
+    h2:
+        console:
+            enabled: true
+            path: /h2
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: validate
+    liquibase:
+        default-schema: WALLET
+        enabled: true
+        liquibase-schema: WALLET

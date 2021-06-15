@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Chris Magro
+      changes:
+        - createTable:
+            tableName: player
+            remarks: "Table with all players details"
+            columns:
+              - column:
+                  name: id
+                  type: char(36)
+                  remarks: "Player's identifier."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: varchar(255)
+                  remarks: "Player's Name"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: varchar(255)
+                  remarks: "Player's Surname"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(255)
+                  remarks: "Player's Name"
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: transaction
+            remarks: "Table with all players' transactions"
+            columns:
+              - column:
+                  name: id
+                  type: char(36)
+                  remarks: "transaction identifier."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: decimal(19,2)
+                  remarks: "Transaction Monetary Amount"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: varchar(10)
+                  remarks: "Transaction Currency"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_type
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_timestamp
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  remarks: "transaction creation timestamp."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: char(36)
+                  remarks: "Player's FK identifier."
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_player_id
+                    references: player(id)
+
