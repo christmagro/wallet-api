@@ -2,7 +2,6 @@ package com.chris.wallet.api.dao;
 
 import com.chris.wallet.api.model.Transaction;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 

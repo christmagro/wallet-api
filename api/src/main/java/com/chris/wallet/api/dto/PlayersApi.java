@@ -14,5 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class PlayersApi implements Serializable {
+    private static final long serialVersionUID = -2750474845995634047L;
     private List<Player> players;
 }

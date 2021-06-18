@@ -2,6 +2,7 @@ package com.chris.wallet.api.dao.impl;
 
 import com.chris.wallet.api.dao.TransactionDao;
 import com.chris.wallet.api.model.Transaction;
+import com.chris.wallet.api.exception.TransactionAlreadyExistsException;
 import com.chris.wallet.api.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class TransactionDaoImpl implements TransactionDao {
 
     @Override
     public Transaction addTransaction(Transaction transaction) {
+        transactionRepository.findById(transaction.getId()).ifPresent(transaction1 -> { throw new TransactionAlreadyExistsException(transaction.getId().toString());});
         return transactionRepository.save(transaction);
     }
 

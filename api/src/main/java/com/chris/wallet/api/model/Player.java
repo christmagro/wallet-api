@@ -34,7 +34,7 @@ public class Player {
 
     @NotBlank
     @Email
-    @Column(unique=true)
+    @Column(unique = true)
     private String username;
 
     @Valid
@@ -42,7 +42,7 @@ public class Player {
     @Getter(AccessLevel.NONE)
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "player")
-    private List<Transaction> tranasctions = new ArrayList<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
 
 }

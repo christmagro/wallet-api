@@ -1,10 +1,10 @@
 package com.chris.wallet.api;
 
 import com.chris.wallet.api.dao.PlayerDao;
-import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
-import com.chris.wallet.api.exception.PlayerNotFoundException;
 import com.chris.wallet.api.model.Player;
 import com.chris.wallet.api.repository.PlayerRepository;
+import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
+import com.chris.wallet.api.exception.PlayerNotFoundException;
 import junitparams.JUnitParamsRunner;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -113,7 +113,7 @@ public class JpaPlayerTest {
     public static class JpaSessionTestConfiguration {
 
         @Bean
-        public PlayerDaoImpl PlayerDao(final PlayerRepository repository) {
+        public PlayerDaoImpl playerDao(final PlayerRepository repository) {
             return new PlayerDaoImpl(repository);
         }
     }

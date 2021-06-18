@@ -2,13 +2,14 @@ package com.chris.wallet.api;
 
 import com.chris.wallet.api.dao.PlayerDao;
 import com.chris.wallet.api.dao.TransactionDao;
-import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import com.chris.wallet.api.dao.impl.TransactionDaoImpl;
+import com.chris.wallet.api.exception.TransactionAlreadyExistsException;
 import com.chris.wallet.api.model.Player;
 import com.chris.wallet.api.model.Transaction;
 import com.chris.wallet.api.model.type.TransactionType;
 import com.chris.wallet.api.repository.PlayerRepository;
 import com.chris.wallet.api.repository.TransactionRepository;
+import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import junitparams.JUnitParamsRunner;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -29,10 +30,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertThrows;
@@ -153,7 +152,7 @@ public class JpaTransactionTest {
     }
 
     @Test
-    public void addTransactionsSameId_should_persist_only_one() {
+    public void addTransactionsSameId_should_throw_transaction_already_exist() {
         final UUID transactionId = UUID.randomUUID();
         transactionDao.addTransaction(Transaction.builder()
                                                  .id(transactionId)
@@ -164,16 +163,15 @@ public class JpaTransactionTest {
                                                  .player(player)
                                                  .build());
 
-        transactionDao.addTransaction(Transaction.builder()
-                                                 .id(transactionId)
-                                                 .transactionType(TransactionType.DEBIT)
-                                                 .currency("EUR")
-                                                 .amount(BigDecimal.valueOf(20.00))
-                                                 .transactionTime(LocalDateTime.now())
-                                                 .player(player)
-                                                 .build());
+        assertThrows(TransactionAlreadyExistsException.class, () -> transactionDao.addTransaction(Transaction.builder()
+                                                                                                             .id(transactionId)
+                                                                                                             .transactionType(TransactionType.DEBIT)
+                                                                                                             .currency("EUR")
+                                                                                                             .amount(BigDecimal.valueOf(20.00))
+                                                                                                             .transactionTime(LocalDateTime.now())
+                                                                                                             .player(player)
+                                                                                                             .build()));
 
-        Assertions.assertThat(transactionDao.getAllPlayerTransactions(player.getId())).hasSize(1);
     }
 
 
@@ -209,12 +207,12 @@ public class JpaTransactionTest {
     public static class JpaSessionTestConfiguration {
 
         @Bean
-        public PlayerDao PlayerDao(final PlayerRepository playerRepository) {
+        public PlayerDao playerdao(final PlayerRepository playerRepository) {
             return new PlayerDaoImpl(playerRepository);
         }
 
         @Bean
-        public TransactionDao TransactionDao(final TransactionRepository transactionRepository) {
+        public TransactionDao transactionDao(final TransactionRepository transactionRepository) {
             return new TransactionDaoImpl(transactionRepository);
         }
     }

@@ -1,6 +1,5 @@
 package com.chris.wallet.api.dao;
 
-import com.chris.wallet.api.dto.PlayerApi;
 import com.chris.wallet.api.model.Player;
 
 import java.util.UUID;
