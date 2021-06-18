@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ExchangeRateApi {
 
     @GetMapping("/api/latest.json")
-    ResponseEntity<ExchangeRateResponse> getExchangeRate(@RequestParam(value = "app_id", required = true) String appId);
+    ResponseEntity<ExchangeRateResponse> getExchangeRate(@RequestParam(value = "app_id") String appId);
 }

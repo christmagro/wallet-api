@@ -18,3 +18,7 @@ spring:
         default-schema: WALLET
         enabled: true
         liquibase-schema: WALLET
+    cache:
+        type: ehcache
+        ehcache:
+            config: classpath:/ehcache.xml

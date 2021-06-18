@@ -7,6 +7,7 @@ import com.chris.wallet.api.integration.exchange.ExchangeRateResponse;
 import com.chris.wallet.api.service.RateExchangeService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ public class RateExchangeServiceImpl implements RateExchangeService {
     private final WalletConfig walletConfig;
 
     @Override
+    @Cacheable(value = "exchangeRate", unless = "#result==null")
     public Optional<BigDecimal> getExchangeRate(String rate) {
         try {
             if (Objects.nonNull(walletConfig.getAppId()) && StringUtils.isNotBlank(rate)) {

@@ -35,6 +35,7 @@ public class TransactionMapperConfigurer implements ConfigurableMapperConfigurer
                .customize(new CustomMapper<>() {
                    @Override
                    public void mapAtoB(TransactionApi transactionApi, Transaction transaction, MappingContext context) {
+                       transaction.setTransactionTime(LocalDateTime.now());
                        transaction.setPlayer(playerDao.getPlayer(transactionApi.getPlayerId()));
                        transaction.setTransactionType(transactionApi.getPaymentDirection().equals(PaymentDirection.DEBIT) ? TransactionType.DEBIT : TransactionType.CREDIT);
                        transaction.setCurrency(currencyConverter.convertToDatabaseColumn(transactionApi.getCurrency()));

@@ -39,9 +39,8 @@ public class Transaction {
     @Column(name = "transaction_type")
     private TransactionType transactionType;
 
-    @Builder.Default
     @Column(name = "transaction_timestamp", columnDefinition = "TIMESTAMP")
-    private LocalDateTime transactionTime = LocalDateTime.now();
+    private LocalDateTime transactionTime;
 
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
