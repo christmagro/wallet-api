@@ -12,6 +12,8 @@ spring:
     password:
     driver-class-name: org.h2.Driver
     platform: h2
+  cache:
+    type: NONE
 
 logging:
   level:

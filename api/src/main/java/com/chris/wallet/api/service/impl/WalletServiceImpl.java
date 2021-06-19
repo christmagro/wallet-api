@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,7 +45,9 @@ public class WalletServiceImpl implements WalletService {
         if (transactionApi.getPaymentDirection().equals(PaymentDirection.DEBIT)) {
             final BigDecimal currentBalance = calculateCurrentAmount(transactionDao.getAllPlayerTransactions(transactionApi.getPlayerId()));
 
-            if (currentBalance.subtract(transactionApi.getAmount()).compareTo(BigDecimal.ZERO) < 0) {
+
+
+            if (currentBalance.subtract(calculateBaseCurrencyAmount(transactionApi.getCurrency(), transactionApi.getAmount())).compareTo(BigDecimal.ZERO) < 0) {
                 throw new NotEnoughFundsException();
             }
         }
@@ -86,6 +89,13 @@ public class WalletServiceImpl implements WalletService {
 
                            }).reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    }
+
+    private BigDecimal calculateBaseCurrencyAmount(Currency currency, BigDecimal amount){
+        final BigDecimal exchangeRate = rateExchangeService.getExchangeRate(currencyConverter.convertToDatabaseColumn(currency))
+                                                           .orElseThrow(InvalidExchangeRateException::new);
+
+        return amount.divide(exchangeRate, 2, RoundingMode.HALF_DOWN);
     }
 
 }

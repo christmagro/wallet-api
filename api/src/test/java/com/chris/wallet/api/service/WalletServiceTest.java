@@ -79,6 +79,7 @@ public class WalletServiceTest {
         //when
         when(transactionDao.getAllPlayerTransactions(playerApi.getId())).thenReturn(transactions);
         when(rateExchangeService.getExchangeRate(EURO_CURRENCY)).thenReturn(Optional.of(EUR_EXCHANGE_RATE));
+        when(rateExchangeService.getExchangeRate(USD_CURRENCY)).thenReturn(Optional.of(USD_EXCHANGE_RATE));
         //then
         underTest.addTransaction(transactionApi);
 
@@ -95,11 +96,14 @@ public class WalletServiceTest {
         when(transactionDao.getAllPlayerTransactions(player.getId())).thenReturn(transactions);
         when(transactionDao.addTransaction(any())).thenReturn(getDebitTransaction(ENOUGH_FUNDS));
         when(rateExchangeService.getExchangeRate(EURO_CURRENCY)).thenReturn(Optional.of(EUR_EXCHANGE_RATE));
+        when(rateExchangeService.getExchangeRate(USD_CURRENCY)).thenReturn(Optional.of(USD_EXCHANGE_RATE));
         when(playerDao.getPlayer(transactionApi.getPlayerId())).thenReturn(player);
         //then
         underTest.addTransaction(transactionApi);
         verify(transactionDao, times(1)).getAllPlayerTransactions(player.getId());
         verify(transactionDao, times(1)).addTransaction(any());
+        verify(rateExchangeService, times(3)).getExchangeRate(any());
+
     }
 
     @Test
