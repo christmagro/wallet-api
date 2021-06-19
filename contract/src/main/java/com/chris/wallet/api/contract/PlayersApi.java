@@ -1,6 +1,5 @@
-package com.chris.wallet.api.dto;
+package com.chris.wallet.api.contract;
 
-import com.chris.wallet.api.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,9 +1,9 @@
 package com.chris.wallet.api.service;
 
+import com.chris.wallet.api.contract.PlayerApi;
+import com.chris.wallet.api.contract.PlayerRequestApi;
+import com.chris.wallet.api.contract.PlayersApi;
 import com.chris.wallet.api.dao.PlayerDao;
-import com.chris.wallet.api.dto.PlayerApi;
-import com.chris.wallet.api.dto.PlayerRequestApi;
-import com.chris.wallet.api.dto.PlayersApi;
 import com.chris.wallet.api.exception.PlayerNotFoundException;
 import com.chris.wallet.api.exception.UsernameAlreadyExistsException;
 import com.chris.wallet.api.mapper.BaseConfigurableMapper;

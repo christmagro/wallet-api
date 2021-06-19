@@ -1,12 +1,12 @@
 package com.chris.wallet.api.service;
 
+import com.chris.wallet.api.contract.PaymentDirection;
+import com.chris.wallet.api.contract.PlayerBalanceApi;
+import com.chris.wallet.api.contract.TransactionApi;
+import com.chris.wallet.api.contract.TransactionHistoryResponseApi;
 import com.chris.wallet.api.converter.CurrencyConverter;
 import com.chris.wallet.api.dao.TransactionDao;
 import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
-import com.chris.wallet.api.dto.PaymentDirection;
-import com.chris.wallet.api.dto.PlayerBalanceApi;
-import com.chris.wallet.api.dto.TransactionApi;
-import com.chris.wallet.api.dto.TransactionHistoryResponseApi;
 import com.chris.wallet.api.exception.InvalidExchangeRate;
 import com.chris.wallet.api.exception.NotEnoughFundsException;
 import com.chris.wallet.api.mapper.BaseConfigurableMapper;

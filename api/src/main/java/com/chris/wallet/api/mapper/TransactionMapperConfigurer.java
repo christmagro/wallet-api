@@ -1,10 +1,10 @@
 package com.chris.wallet.api.mapper;
 
 
+import com.chris.wallet.api.contract.PaymentDirection;
+import com.chris.wallet.api.contract.TransactionApi;
 import com.chris.wallet.api.converter.CurrencyConverter;
 import com.chris.wallet.api.dao.PlayerDao;
-import com.chris.wallet.api.dto.PaymentDirection;
-import com.chris.wallet.api.dto.TransactionApi;
 import com.chris.wallet.api.mapper.config.ConfigurableMapperConfigurer;
 import com.chris.wallet.api.model.Transaction;
 import com.chris.wallet.api.model.type.TransactionType;

@@ -1,7 +1,9 @@
-package com.chris.wallet.api.dto;
+package com.chris.wallet.api.contract;
 
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Currency;

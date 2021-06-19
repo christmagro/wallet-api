@@ -1,8 +1,10 @@
 package com.chris.wallet.api.service;
 
-import com.chris.wallet.api.dto.PlayerApi;
-import com.chris.wallet.api.dto.PlayerRequestApi;
-import com.chris.wallet.api.dto.PlayersApi;
+
+
+import com.chris.wallet.api.contract.PlayerApi;
+import com.chris.wallet.api.contract.PlayerRequestApi;
+import com.chris.wallet.api.contract.PlayersApi;
 
 import java.util.UUID;
 
