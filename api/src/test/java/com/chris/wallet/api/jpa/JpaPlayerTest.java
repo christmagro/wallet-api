@@ -1,10 +1,10 @@
-package com.chris.wallet.api;
+package com.chris.wallet.api.jpa;
 
 import com.chris.wallet.api.dao.PlayerDao;
-import com.chris.wallet.api.model.Player;
-import com.chris.wallet.api.repository.PlayerRepository;
 import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import com.chris.wallet.api.exception.PlayerNotFoundException;
+import com.chris.wallet.api.model.Player;
+import com.chris.wallet.api.repository.PlayerRepository;
 import junitparams.JUnitParamsRunner;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -76,22 +77,23 @@ public class JpaPlayerTest {
 
     @Test
     public void createAndSaveNameMissing_shouldFailFromCreatingAndThrowException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(TransactionSystemException.class, () -> {
             playerDao.addPlayer(Player.builder().surname("magro").username("christmagro@gmail.com").build());
         });
     }
 
     @Test
     public void createAndSaveSurnameMissing_shouldFailFromCreatingAndThrowException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(TransactionSystemException.class, () -> {
             playerDao.addPlayer(Player.builder().name("chris").username("christmagro@gmail.com").build());
         });
     }
 
     @Test
     public void createAndSaveUsernameMissing_shouldFailFromCreatingAndThrowException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(TransactionSystemException.class, () -> {
             playerDao.addPlayer(Player.builder().name("chris").surname("magro").build());
+
         });
     }
 

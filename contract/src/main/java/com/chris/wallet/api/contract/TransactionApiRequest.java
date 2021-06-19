@@ -6,11 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.UUID;
 
@@ -20,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TransactionApi implements Serializable {
+public class TransactionApiRequest implements Serializable {
 
     private static final long serialVersionUID = -3711275764983640943L;
     @NotNull
@@ -35,9 +33,7 @@ public class TransactionApi implements Serializable {
     @NotNull
     private PaymentDirection paymentDirection;
 
-    private LocalDateTime transactionTime;
-
-    @NotBlank
+    @NotNull
     private UUID playerId;
 
 }

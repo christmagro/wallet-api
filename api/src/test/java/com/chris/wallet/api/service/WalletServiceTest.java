@@ -7,7 +7,7 @@ import com.chris.wallet.api.contract.TransactionHistoryResponseApi;
 import com.chris.wallet.api.converter.CurrencyConverter;
 import com.chris.wallet.api.dao.TransactionDao;
 import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
-import com.chris.wallet.api.exception.InvalidExchangeRate;
+import com.chris.wallet.api.exception.InvalidExchangeRateException;
 import com.chris.wallet.api.exception.NotEnoughFundsException;
 import com.chris.wallet.api.mapper.BaseConfigurableMapper;
 import com.chris.wallet.api.mapper.TransactionMapperConfigurer;
@@ -113,7 +113,7 @@ public class WalletServiceTest {
         //then
         final PlayerBalanceApi balance = underTest.getBalance(player.getId());
         verify(rateExchangeService, times(2)).getExchangeRate(EURO_CURRENCY);
-        Assert.assertEquals(PlayerBalanceApi.builder().amount(BigDecimal.valueOf(10.8001).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
+        Assert.assertEquals(PlayerBalanceApi.builder().playerId(player.getId()).amount(BigDecimal.valueOf(10.8001).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class WalletServiceTest {
         //then
         final PlayerBalanceApi balance = underTest.getBalance(player.getId());
         verify(rateExchangeService, times(2)).getExchangeRate(USD_CURRENCY);
-        Assert.assertEquals(PlayerBalanceApi.builder().amount(BigDecimal.valueOf(35).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
+        Assert.assertEquals(PlayerBalanceApi.builder().playerId(player.getId()).amount(BigDecimal.valueOf(35).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
     }
 
     @Test
@@ -143,10 +143,10 @@ public class WalletServiceTest {
         final PlayerBalanceApi balance = underTest.getBalance(player.getId());
         verify(rateExchangeService, times(2)).getExchangeRate(USD_CURRENCY);
         verify(rateExchangeService, times(2)).getExchangeRate(EURO_CURRENCY);
-        Assert.assertEquals(PlayerBalanceApi.builder().amount(BigDecimal.valueOf(45.8001).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
+        Assert.assertEquals(PlayerBalanceApi.builder().playerId(player.getId()).amount(BigDecimal.valueOf(45.8001).setScale(2, RoundingMode.HALF_DOWN)).currency(currencyConverter.convertToEntityAttribute("USD")).build(), balance);
     }
 
-    @Test(expected = InvalidExchangeRate.class)
+    @Test(expected = InvalidExchangeRateException.class)
     public void not_supported_currency_should_throw_invalid_exchange_rate() {
         //given
         val transactions = getTransactions();

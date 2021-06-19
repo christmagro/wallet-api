@@ -1,7 +1,8 @@
-package com.chris.wallet.api;
+package com.chris.wallet.api.jpa;
 
 import com.chris.wallet.api.dao.PlayerDao;
 import com.chris.wallet.api.dao.TransactionDao;
+import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import com.chris.wallet.api.dao.impl.TransactionDaoImpl;
 import com.chris.wallet.api.exception.TransactionAlreadyExistsException;
 import com.chris.wallet.api.model.Player;
@@ -9,7 +10,6 @@ import com.chris.wallet.api.model.Transaction;
 import com.chris.wallet.api.model.type.TransactionType;
 import com.chris.wallet.api.repository.PlayerRepository;
 import com.chris.wallet.api.repository.TransactionRepository;
-import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import junitparams.JUnitParamsRunner;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -92,7 +93,7 @@ public class JpaTransactionTest {
 
     @Test
     public void addTransactionsWithEmptyCurrency_should_fail() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(TransactionSystemException.class, () -> {
             transactionDao.addTransaction(Transaction.builder()
                                                      .id(UUID.randomUUID())
                                                      .transactionType(TransactionType.DEBIT)
@@ -105,7 +106,7 @@ public class JpaTransactionTest {
 
     @Test
     public void addTransactionsWithEmptyAmount_should_fail() {
-        assertThrows(DataIntegrityViolationException.class, () ->
+        assertThrows(TransactionSystemException.class, () ->
             transactionDao.addTransaction(Transaction.builder()
                                                      .id(UUID.randomUUID())
                                                      .transactionType(TransactionType.DEBIT)
@@ -117,7 +118,7 @@ public class JpaTransactionTest {
 
     @Test
     public void addTransactionsWithoutType_should_fail() {
-        assertThrows(DataIntegrityViolationException.class, () ->
+        assertThrows(TransactionSystemException.class, () ->
             transactionDao.addTransaction(Transaction.builder()
                                                      .id(UUID.randomUUID())
                                                      .currency("EUR")

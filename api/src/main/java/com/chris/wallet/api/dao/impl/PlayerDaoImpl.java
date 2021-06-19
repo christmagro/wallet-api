@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,12 +29,12 @@ public class PlayerDaoImpl implements PlayerDao {
     }
 
     @Override
-    public Player addPlayer(final Player player) {
+    public Player addPlayer(@Valid final Player player) {
         return playerRepository.save(player);
     }
 
     @Override
-    public Player editPlayer(UUID playerId, Player player) {
+    public Player editPlayer(UUID playerId, @Valid Player player) {
         getPlayer(playerId);
         player.setId(playerId);
         return playerRepository.save(player);

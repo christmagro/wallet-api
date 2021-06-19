@@ -6,7 +6,7 @@ import com.chris.wallet.api.contract.TransactionApi;
 import com.chris.wallet.api.contract.TransactionHistoryResponseApi;
 import com.chris.wallet.api.converter.CurrencyConverter;
 import com.chris.wallet.api.dao.TransactionDao;
-import com.chris.wallet.api.exception.InvalidExchangeRate;
+import com.chris.wallet.api.exception.InvalidExchangeRateException;
 import com.chris.wallet.api.exception.NotEnoughFundsException;
 import com.chris.wallet.api.model.Transaction;
 import com.chris.wallet.api.model.type.TransactionType;
@@ -57,6 +57,7 @@ public class WalletServiceImpl implements WalletService {
         return PlayerBalanceApi.builder()
                                .currency(currencyConverter.convertToEntityAttribute("USD")) //default Base currency cannot be changed since openexchange only offers change of Base Rate for the paid option
                                .amount(calculateCurrentAmount(transactionDao.getAllPlayerTransactions(playerId)))
+                               .playerId(playerId)
                                .build();
     }
 
@@ -78,7 +79,7 @@ public class WalletServiceImpl implements WalletService {
                                                      transaction.getAmount().negate() :
                                                      transaction.getAmount());
                                final BigDecimal exchangeRate = rateExchangeService.getExchangeRate(transaction.getCurrency())
-                                                                                  .orElseThrow(InvalidExchangeRate::new);
+                                                                                  .orElseThrow(InvalidExchangeRateException::new);
 
                                return transaction.getAmount().divide(exchangeRate, 2, RoundingMode.HALF_DOWN);
 

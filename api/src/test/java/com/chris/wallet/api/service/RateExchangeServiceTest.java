@@ -1,7 +1,7 @@
 package com.chris.wallet.api.service;
 
 import com.chris.wallet.api.config.WalletConfig;
-import com.chris.wallet.api.exception.ExchangeRateServiceUnavailable;
+import com.chris.wallet.api.exception.ExchangeRateServiceUnavailableExceptions;
 import com.chris.wallet.api.integration.exchange.ExchangeRateApiClient;
 import com.chris.wallet.api.integration.exchange.ExchangeRateResponse;
 import com.chris.wallet.api.service.impl.RateExchangeServiceImpl;
@@ -84,7 +84,7 @@ public class RateExchangeServiceTest {
         Assert.assertEquals(Optional.empty(), rateResolved);
     }
 
-    @Test(expected = ExchangeRateServiceUnavailable.class)
+    @Test(expected = ExchangeRateServiceUnavailableExceptions.class)
     public void exchange_rate_api_failure_should_throw_ExchangeRate_Service_Unavailable() {
         //when
         when(walletConfig.getAppId()).thenReturn("test_app_id");

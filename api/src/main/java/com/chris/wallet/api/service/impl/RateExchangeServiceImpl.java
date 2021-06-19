@@ -1,7 +1,7 @@
 package com.chris.wallet.api.service.impl;
 
 import com.chris.wallet.api.config.WalletConfig;
-import com.chris.wallet.api.exception.ExchangeRateServiceUnavailable;
+import com.chris.wallet.api.exception.ExchangeRateServiceUnavailableExceptions;
 import com.chris.wallet.api.integration.exchange.ExchangeRateApiClient;
 import com.chris.wallet.api.integration.exchange.ExchangeRateResponse;
 import com.chris.wallet.api.service.RateExchangeService;
@@ -34,7 +34,7 @@ public class RateExchangeServiceImpl implements RateExchangeService {
             }
             return Optional.empty();
         } catch (Exception e) {
-            throw new ExchangeRateServiceUnavailable(e.getMessage());
+            throw new ExchangeRateServiceUnavailableExceptions(e.getMessage());
         }
     }
 

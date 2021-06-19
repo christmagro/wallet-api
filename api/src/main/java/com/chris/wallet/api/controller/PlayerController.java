@@ -1,68 +1,48 @@
 package com.chris.wallet.api.controller;
 
-import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
-import com.chris.wallet.api.model.Player;
-import com.chris.wallet.api.model.Transaction;
-import com.chris.wallet.api.model.type.TransactionType;
-import com.chris.wallet.api.repository.TransactionRepository;
+import com.chris.wallet.api.contract.PlayerApi;
+import com.chris.wallet.api.contract.PlayerRequestApi;
+import com.chris.wallet.api.contract.PlayersApi;
+import com.chris.wallet.api.contract.WalletApiResponse;
+import com.chris.wallet.api.service.PlayerService;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
+import javax.validation.Valid;
 import java.util.UUID;
 
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping(path = "/player")
 public class PlayerController {
 
-    private final WalletService walletService;
-    private final PlayerDaoImpl playerDao;
-    private final CurrencyConverter currencyConverter;
+    private final PlayerService playerService;
 
 
-    @PostMapping()
-    public TransactionApi post() {
-        final Player player = playerDao.addPlayer(Player.builder().name("chris").surname("magro").username("christmagro" + RandomString.make(5) + "@gmail.com").build());
-
-
-        walletService.addTransaction(TransactionApi.builder()
-                                                   .id(UUID.randomUUID())
-                                                   .paymentDirection(PaymentDirection.CREDIT)
-                                                   .amount(BigDecimal.valueOf(600.00))
-                                                   .currency(currencyConverter.convertToEntityAttribute("EUR"))
-                                                   .playerId(player.getId())
-                                                   .build());
-
-        final TransactionApi eur = walletService.addTransaction(TransactionApi.builder()
-                                                                              .id(UUID.randomUUID())
-                                                                              .paymentDirection(PaymentDirection.DEBIT)
-                                                                              .amount(BigDecimal.valueOf(400.00))
-                                                                              .currency(currencyConverter.convertToEntityAttribute("EUR"))
-                                                                              .playerId(player.getId())
-                                                                              .build());
-        return eur;
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public WalletApiResponse<PlayerApi> createPlayer(@RequestBody @Valid PlayerRequestApi playerRequestApi) {
+        return WalletApiResponse.build(playerService.createPlayer(playerRequestApi));
     }
 
-    @GetMapping()
-    public PlayerBalanceApi getBalance(@RequestParam final UUID playerId) {
-        return walletService.getBalance(playerId);
+    @PutMapping(path = "/{playerId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public WalletApiResponse<PlayerApi> updatePlayer(@PathVariable(name = "playerId") final UUID playerId, @RequestBody @Valid PlayerRequestApi playerRequestApi) {
+        return WalletApiResponse.build(playerService.updatePlayer(playerId, playerRequestApi));
     }
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public WalletApiResponse<PlayerApi> getPlayer(@RequestParam final UUID playerId) {
+        return WalletApiResponse.build(playerService.getPlayer(playerId));
 
-    @GetMapping(path = "/history")
-    public TransactionHistoryResponseApi getTransactionHistory(@RequestParam final UUID playerId) {
-        return walletService.getPlayerTransactionHistory(playerId);
     }
 
-//    @GetMapping()
-//    private void test() {
-//        final ResponseEntity<ExchangRateResponse> exchangeRate = exchangeRateApi.getExchangeRate("0e6b215c947d4cd0a4e669fe718cb80b");
-//        System.out.println("t");
-//    }
+    @GetMapping(path = "/all")
+    @ResponseStatus(HttpStatus.OK)
+    public WalletApiResponse<PlayersApi> getPlayers() {
+        return WalletApiResponse.build(playerService.getPlayers());
+    }
 }

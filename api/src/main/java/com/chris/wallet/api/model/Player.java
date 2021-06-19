@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class Player {
     @NotBlank
     private String surname;
 
-    @NotBlank
+    @NotNull
     @Email
     @Column(unique = true)
     private String username;
