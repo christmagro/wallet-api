@@ -9,9 +9,8 @@ import java.util.Currency;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Builder
-public class PlayerBalanceApi extends PlayerApi {
+public class PlayerBalanceApi  {
     private static final long serialVersionUID = 104265030184793895L;
 
     private Currency currency;

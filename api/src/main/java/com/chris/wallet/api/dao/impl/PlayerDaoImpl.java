@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -30,4 +31,18 @@ public class PlayerDaoImpl implements PlayerDao {
     public Player addPlayer(final Player player) {
         return playerRepository.save(player);
     }
+
+    @Override
+    public Player editPlayer(UUID playerId, Player player) {
+        getPlayer(playerId);
+        player.setId(playerId);
+        return playerRepository.save(player);
+    }
+
+    @Override
+    public List<Player> getAllPlayers() {
+        return playerRepository.findAll();
+    }
+
+
 }

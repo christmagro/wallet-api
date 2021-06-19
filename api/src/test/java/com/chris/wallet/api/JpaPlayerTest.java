@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertThrows;
@@ -101,6 +102,40 @@ public class JpaPlayerTest {
         final Player returnedPlayer = playerDao.getPlayer(saved.getId());
         Assertions.assertThat(testEntityManager.find(Player.class, saved.getId())).isEqualTo(returnedPlayer);
     }
+
+    @Test
+    @Transactional
+    public void editPlayer_should_update_existing_player_successfully() {
+        final Player saved = playerDao.addPlayer(Player.builder().name("chris").surname("magro").username("christmagro@gmail.com").build());
+        final Player updatedPlayer = playerDao.editPlayer(saved.getId(), Player.builder().name("chris_updated").surname("magro_updated").username("christmagro@gmail.com").build());
+        Assertions.assertThat(testEntityManager.find(Player.class, saved.getId())).isEqualTo(updatedPlayer);
+    }
+
+    @Test
+    @Transactional
+    public void editInvalidPlayerId_should_fail() {
+        assertThrows(PlayerNotFoundException.class, () -> {
+            playerDao.editPlayer(UUID.randomUUID(), Player.builder().name("chris").surname("magro").build());
+        });
+
+    }
+
+    @Test
+    @Transactional
+    public void getAllPlayers_should_get_all_players_successfully() {
+         playerDao.addPlayer(Player.builder().name("chris").surname("magro").username("christmagro@gmail.com").build());
+         playerDao.addPlayer(Player.builder().name("chris1").surname("magro2").username("christmagro2@gmail.com").build());
+        final List<Player> allPlayers = playerDao.getAllPlayers();
+        Assertions.assertThat(allPlayers).hasSize(2);
+    }
+
+    @Test
+    @Transactional
+    public void getNoPlayers_should_get_all_players_successfully() {
+        final List<Player> allPlayers = playerDao.getAllPlayers();
+        Assertions.assertThat(allPlayers).hasSize(0);
+    }
+
 
 
     @Test

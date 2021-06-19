@@ -2,12 +2,15 @@ package com.chris.wallet.api.service;
 
 import com.chris.wallet.api.converter.CurrencyConverter;
 import com.chris.wallet.api.dao.TransactionDao;
+import com.chris.wallet.api.dao.impl.PlayerDaoImpl;
 import com.chris.wallet.api.dto.PaymentDirection;
 import com.chris.wallet.api.dto.PlayerBalanceApi;
 import com.chris.wallet.api.dto.TransactionApi;
 import com.chris.wallet.api.dto.TransactionHistoryResponseApi;
 import com.chris.wallet.api.exception.InvalidExchangeRate;
 import com.chris.wallet.api.exception.NotEnoughFundsException;
+import com.chris.wallet.api.mapper.BaseConfigurableMapper;
+import com.chris.wallet.api.mapper.TransactionMapperConfigurer;
 import com.chris.wallet.api.model.Player;
 import com.chris.wallet.api.model.Transaction;
 import com.chris.wallet.api.model.type.TransactionType;
@@ -18,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -36,16 +40,18 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class WalletServiceTest {
 
+    @InjectMocks
+    private WalletServiceImpl underTest;
+
+    private CurrencyConverter currencyConverter;
+
+    private MapperFacade mapper;
+
     @Mock
     private TransactionDao transactionDao;
 
     @Mock
-    private CurrencyConverter currencyConverter;
-
-    private WalletService underTest;
-
-    @Mock
-    private MapperFacade mapper;
+    private PlayerDaoImpl playerDao;
 
     @Mock
     private RateExchangeService rateExchangeService;
@@ -59,6 +65,8 @@ public class WalletServiceTest {
 
     @Before
     public void init() {
+        currencyConverter = new CurrencyConverter();
+        mapper = new BaseConfigurableMapper(Collections.singletonList(new TransactionMapperConfigurer(playerDao, currencyConverter)));
         underTest = new WalletServiceImpl(transactionDao, rateExchangeService, currencyConverter, mapper);
     }
 
@@ -82,21 +90,16 @@ public class WalletServiceTest {
         //given
         val transactions = getTransactions();
         val transactionApi = getDebitTransactionApi(ENOUGH_FUNDS);
-        val playerApi = getPlayer();
+        val player = getPlayer();
         //when
-        when(mapper.map(transactionApi, Transaction.class)).thenReturn(getDebitTransaction(ENOUGH_FUNDS));
-        when(mapper.map(getDebitTransaction(ENOUGH_FUNDS), TransactionApi.class)).thenReturn(transactionApi);
-        when(transactionDao.getAllPlayerTransactions(playerApi.getId())).thenReturn(transactions);
-        when(transactionDao.addTransaction(getDebitTransaction(ENOUGH_FUNDS))).thenReturn(getDebitTransaction(ENOUGH_FUNDS));
-        when(rateExchangeService.getExchangeRate(EURO_CURRENCY)).thenReturn(Optional.of(BigDecimal.valueOf(0.833324)));
+        when(transactionDao.getAllPlayerTransactions(player.getId())).thenReturn(transactions);
+        when(transactionDao.addTransaction(any())).thenReturn(getDebitTransaction(ENOUGH_FUNDS));
+        when(rateExchangeService.getExchangeRate(EURO_CURRENCY)).thenReturn(Optional.of(EUR_EXCHANGE_RATE));
+        when(playerDao.getPlayer(transactionApi.getPlayerId())).thenReturn(player);
         //then
         underTest.addTransaction(transactionApi);
-        verify(transactionDao, times(1)).getAllPlayerTransactions(playerApi.getId());
-        verify(transactionDao, times(1)).addTransaction(getDebitTransaction(ENOUGH_FUNDS));
-        verify(mapper, times(1)).map(getDebitTransactionApi(ENOUGH_FUNDS), Transaction.class);
-        verify(transactionDao, times(1)).addTransaction(getDebitTransaction(ENOUGH_FUNDS));
-        verify(mapper, times(1)).map(getDebitTransaction(ENOUGH_FUNDS), TransactionApi.class);
-
+        verify(transactionDao, times(1)).getAllPlayerTransactions(player.getId());
+        verify(transactionDao, times(1)).addTransaction(any());
     }
 
     @Test
@@ -158,16 +161,14 @@ public class WalletServiceTest {
     public void get_transactions_for_player_successfully() {
         //given
         val transactions = getMixedTransactions();
-        val transactionApis = getMixedTransactionsApi();
         val player = getPlayer();
         //when
         when(transactionDao.getAllPlayerTransactions(player.getId())).thenReturn(transactions);
-        when(mapper.mapAsList(transactions, TransactionApi.class)).thenReturn(transactionApis);
         //then
         final TransactionHistoryResponseApi playerTransactionHistory = underTest.getPlayerTransactionHistory(player.getId());
         assertThat(playerTransactionHistory.getTransactions(), hasSize(4));
-        assertThat(playerTransactionHistory.getTransactions().get(0), equalTo(transactionApis.get(3)));
-        assertThat(playerTransactionHistory.getTransactions().get(3), equalTo(transactionApis.get(0)));
+        assertThat(playerTransactionHistory.getTransactions().get(0), equalTo(mapper.map(transactions.get(3), TransactionApi.class)));
+        assertThat(playerTransactionHistory.getTransactions().get(3), equalTo(mapper.map(transactions.get(0), TransactionApi.class)));
     }
 
     //Total Balance Amount 9 EUR  -> USD 10.8001
@@ -216,7 +217,7 @@ public class WalletServiceTest {
     public List<Transaction> getMixedTransactions() {
         return Stream.of(Transaction.builder()
                                     .id(UUID.randomUUID())
-                                    .transactionTime(LocalDateTime.now().minusHours(10))
+                                    .transactionTime(LocalDateTime.now().minusHours(4))
                                     .currency(USD_CURRENCY)
                                     .amount(BigDecimal.valueOf(25.00))
                                     .transactionType(TransactionType.CREDIT)
@@ -224,7 +225,7 @@ public class WalletServiceTest {
                                     .build(),
                          Transaction.builder()
                                     .id(UUID.randomUUID())
-                                    .transactionTime(LocalDateTime.now().minusHours(1))
+                                    .transactionTime(LocalDateTime.now().minusHours(3))
                                     .currency(USD_CURRENCY)
                                     .transactionType(TransactionType.CREDIT)
                                     .amount(BigDecimal.TEN)
@@ -232,7 +233,7 @@ public class WalletServiceTest {
                                     .build(),
                          Transaction.builder()
                                     .id(UUID.randomUUID())
-                                    .transactionTime(LocalDateTime.now().minusHours(10))
+                                    .transactionTime(LocalDateTime.now().minusHours(2))
                                     .currency(EURO_CURRENCY)
                                     .amount(BigDecimal.ONE)
                                     .transactionType(TransactionType.DEBIT)
@@ -246,39 +247,6 @@ public class WalletServiceTest {
                                     .amount(BigDecimal.TEN)
                                     .player(getPlayer())
                                     .build()
-                        ).collect(Collectors.toList());
-    }
-
-    //Total Balance Amount 45.8001 USD
-    public List<TransactionApi> getMixedTransactionsApi() {
-        return Stream.of(TransactionApi.builder()
-                                       .id(UUID.randomUUID())
-                                       .transactionTime(LocalDateTime.now().minusHours(4))
-                                       .currency(currencyConverter.convertToEntityAttribute(USD_CURRENCY))
-                                       .paymentDirection(PaymentDirection.CREDIT)
-                                       .amount(BigDecimal.valueOf(25.00))
-                                       .build(),
-                         TransactionApi.builder()
-                                       .id(UUID.randomUUID())
-                                       .transactionTime(LocalDateTime.now().minusHours(3))
-                                       .currency(currencyConverter.convertToEntityAttribute(USD_CURRENCY))
-                                       .paymentDirection(PaymentDirection.CREDIT)
-                                       .amount(BigDecimal.TEN)
-                                       .build(),
-                         TransactionApi.builder()
-                                       .id(UUID.randomUUID())
-                                       .transactionTime(LocalDateTime.now().minusHours(2))
-                                       .currency(currencyConverter.convertToEntityAttribute(EURO_CURRENCY))
-                                       .amount(BigDecimal.ONE)
-                                       .paymentDirection(PaymentDirection.DEBIT)
-                                       .build(),
-                         TransactionApi.builder()
-                                       .id(UUID.randomUUID())
-                                       .transactionTime(LocalDateTime.now().minusHours(1))
-                                       .currency(currencyConverter.convertToEntityAttribute(EURO_CURRENCY))
-                                       .paymentDirection(PaymentDirection.CREDIT)
-                                       .amount(BigDecimal.TEN)
-                                       .build()
                         ).collect(Collectors.toList());
     }
 
