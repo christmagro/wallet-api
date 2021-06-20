@@ -2,7 +2,10 @@ version: '3'
 
 services:
     wallet-service-api:
-        image: wallet-service-docker:latest
+        image: wallet-service-docker-image
+        build:
+            context: ./
+            dockerfile: Dockerfile
         container_name: wallet-service
         hostname: wallet-service
         mem_limit: 512m
@@ -13,7 +16,7 @@ services:
             - "8080:8080"
         environment:
             SERVER_PORT: 8080
-#       Persistance for H2 DB and Ehcache
+#       Persistence for H2 DB and Ehcache
         volumes:
             - ./tmp:/tmp
         command: sh -c 'apt-get update && apt-get -qq -y install curl && java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap $$APPLICATION_ARGS -jar /opt/app.jar'

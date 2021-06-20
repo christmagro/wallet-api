@@ -22,3 +22,6 @@ spring:
         type: ehcache
         ehcache:
             config: classpath:/ehcache.xml
+logging:
+    level:
+        com.chris.wallet.api: DEBUG
