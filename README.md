@@ -46,6 +46,15 @@ This is a fully functional Rest Api that handles Player's monetary transactions
 - Access api module and execute ***docker-compose build && docker compose up***
 - All APIs can be accessed using ***http://localhost:8080/*** and swagger documentation can be accessed from ***http://localhost:8080/swagger-ui/*** (Different port can be expose inside docker-compose.yml)
 
+## Recommendations for Production Releasing
+Application was written and designed for Production releasing, suggested changes for production release:
+- Redis Caching for multi instance support (This enables horizontal clustering)
+- Implementation of a more Robust relational Database such as MySql, Postsgress instead of H2 (This enables horizontal clustering)
+- Database locking mechanism such as pessimistic and optmistic locking
+- Integration with multiple Exchange Rate services for better exchange rates and redundancy (Currently only 1 exchnage provider)
+- Support for multiple base rates (Currently limited to a single base currency due to third party api limitations)
+- Use of Cloud config server for properties management (Application properties are set directly inside the project should be externalized) (This enables horizontal clustering)
+- Improved error code structure
 
 ## Contact me
 For any additional information please feel free to contact me by email on christmagro@gmail.com
