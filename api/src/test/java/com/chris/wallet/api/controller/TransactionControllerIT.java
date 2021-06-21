@@ -1,21 +1,24 @@
 package com.chris.wallet.api.controller;
 
+import com.chris.wallet.api.WireMockConfig;
 import com.chris.wallet.api.config.WalletConfig;
 import com.chris.wallet.api.contract.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import lombok.val;
-import org.junit.Rule;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -25,15 +28,17 @@ import java.math.RoundingMode;
 import java.util.Currency;
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.springframework.http.HttpStatus.OK;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static java.nio.charset.Charset.defaultCharset;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StreamUtils.copyToString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
+@EnableConfigurationProperties
+@ContextConfiguration(classes = {WireMockConfig.class})
 public class TransactionControllerIT {
 
     @Autowired
@@ -45,8 +50,8 @@ public class TransactionControllerIT {
     final ObjectMapper mapper = new ObjectMapper()
         .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    @Autowired
+    private WireMockServer wireMockServer;
 
     private UUID playerId;
     private final UUID transactionId = UUID.randomUUID();
@@ -55,12 +60,15 @@ public class TransactionControllerIT {
     @SneakyThrows
     @BeforeAll
     public void init() {
-        stubFor(get(urlPathEqualTo("/api/latest.json"))
-                    .withQueryParam("app_id", equalTo(walletConfig.getAppId()))
-                    .willReturn(aResponse()
-                                    .withStatus(OK.value())
-                                    .withHeader("Content-Type", "application/json")
-                                    .withBodyFile("rates.json")));
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/latest.json"))
+                                       .withQueryParam("app_id", equalTo(walletConfig.getAppId()))
+                                       .willReturn(WireMock.aResponse()
+                                                           .withStatus(HttpStatus.OK.value())
+                                                           .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                                           .withBody(
+                                                               copyToString(
+                                                                   TransactionControllerIT.class.getClassLoader().getResourceAsStream("payload/rates.json"),
+                                                                   defaultCharset()))));
 
         val playerRequestApi = PlayerRequestApi.builder()
                                                .name("test")
@@ -260,7 +268,7 @@ public class TransactionControllerIT {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     public void get_player_balance_should_be_successful_with_http_200() throws Exception {
 
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/wallet/" + playerId + "/balance"))
@@ -273,7 +281,7 @@ public class TransactionControllerIT {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     public void get_invalid_player_balance_should_be_successful_with_http_200() throws Exception {
 
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/wallet/" + UUID.randomUUID() + "/balance"))
@@ -286,7 +294,7 @@ public class TransactionControllerIT {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     public void get_transactions_for_player_should_be_successful_with_http_200() throws Exception {
 
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/wallet/" + playerId + "/history"))
@@ -294,12 +302,12 @@ public class TransactionControllerIT {
                                         .andReturn();
 
         final WalletApiResponse<TransactionHistoryResponseApi> transactionHistory = mapToResponse(result, new TypeReference<>() {});
-        Assertions.assertEquals(2, transactionHistory.getData().getTransactions().size() );
+        Assertions.assertEquals(2, transactionHistory.getData().getTransactions().size());
         Assertions.assertEquals(BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_DOWN), transactionHistory.getData().getTransactions().stream().map(TransactionApi::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     public void get_transactions_for_invalid_player_should_be_successful_with_http_200() throws Exception {
 
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/wallet/" + UUID.randomUUID() + "/history"))
@@ -307,10 +315,9 @@ public class TransactionControllerIT {
                                         .andReturn();
 
         final WalletApiResponse<TransactionHistoryResponseApi> transactionHistory = mapToResponse(result, new TypeReference<>() {});
-        Assertions.assertEquals(0, transactionHistory.getData().getTransactions().size() );
+        Assertions.assertEquals(0, transactionHistory.getData().getTransactions().size());
         Assertions.assertEquals(BigDecimal.valueOf(0), transactionHistory.getData().getTransactions().stream().map(TransactionApi::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
     }
-
 
 
     @SneakyThrows

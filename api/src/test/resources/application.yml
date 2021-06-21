@@ -18,3 +18,11 @@ spring:
 logging:
   level:
     com.melita.*: TRACE
+feign:
+  exchange:
+    rate:
+      url: http://localhost:56789
+
+
+
+
